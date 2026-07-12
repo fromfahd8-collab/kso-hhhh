@@ -17,13 +17,11 @@ jobs:
     
     - run: powershell Compress-Archive -Path publish\* -DestinationPath KSO-Ultra-Portable.zip
     
-    - name: Install Inno
-      run: |
+    - run: |
         curl -L https://jrsoftware.org/download.php/inno-setup.exe -o inno.exe
         inno.exe /VERYSILENT
     
-    - name: Prepare Files
-      run: |
+    - run: |
         mkdir setup_files
         xcopy publish\* setup_files\ /E /Y
         xcopy app.ico setup_files\ /Y
@@ -31,9 +29,8 @@ jobs:
         xcopy Modules setup_files\Modules\ /E /Y
         xcopy Resources setup_files\Resources\ /E /Y
     
-    - name: Build Setup
+    - run: "C:\\Program Files (x86)\\Inno Setup 6\\ISCC.exe" setup.iss
       shell: cmd
-      run: "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" setup.iss
     
     - uses: softprops/action-gh-release@v2
       with:
