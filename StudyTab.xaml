@@ -1,0 +1,103 @@
+using System;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using KSO.Modules;
+
+namespace KSO
+{
+    public partial class StudyTab : UserControl
+    {
+        private readonly MainWindow _main;
+        public ObservableCollection<StudyItem> Results { get; } = new();
+
+        public StudyTab(MainWindow main)
+        {
+            InitializeComponent();
+            _main = main;
+            lvStudyResults.ItemsSource = Results;
+        }
+
+        // 1. البحث عن كورس في يوتيوب
+        private async void BtnSearchCourse_Click(object sender, RoutedEventArgs e)
+        {
+            string query = txtCourseSearch.Text.Trim();
+            if(string.IsNullOrEmpty(query)) return;
+
+            Results.Clear();
+            btnSearchCourse.IsEnabled = false;
+            btnSearchCourse.Content = "جاري البحث...";
+
+            try
+            {
+                // نستخدم yt-dlp عشان نجيب البلاي ليست
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "yt-dlp",
+                    Arguments = $"--flat-playlist --get-id --get-title \"ytsearch10:{query}\"",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                using var process = Process.Start(psi);
+                string output = await process.StandardOutput.ReadToEndAsync();
+                await process.WaitForExitAsync();
+
+                foreach(var line in output.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+                {
+                    var parts = line.Split('\t');
+                    if(parts.Length >= 2)
+                        Results.Add(new StudyItem { Title = parts[1], Url = $"https://youtube.com/watch?v={parts[0]}" });
+                }
+            }
+            catch
+            {
+                MessageBox.Show("تأكد ان yt-dlp مثبت. او حمل من المتصفح مباشر", "خطأ");
+            }
+            finally
+            {
+                btnSearchCourse.IsEnabled = true;
+                btnSearchCourse.Content = "بحث";
+            }
+        }
+
+        // 2. انشاء مجلد باسم الكورس
+        private void BtnCreateFolder_Click(object sender, RoutedEventArgs e)
+        {
+            string courseName = txtCourseSearch.Text.Trim();
+            if(string.IsNullOrEmpty(courseName)) return;
+
+            string folder = Path.Combine(_main.Config.DownloadPath, courseName);
+            Directory.CreateDirectory(folder);
+            Process.Start("explorer.exe", folder);
+            MessageBox.Show($"تم انشاء المجلد: {folder}");
+        }
+
+        // 3. تحميل البلاي ليست كاملة
+        private void BtnDownloadPlaylist_Click(object sender, RoutedEventArgs e)
+        {
+            string query = txtCourseSearch.Text.Trim();
+            if(string.IsNullOrEmpty(query)) return;
+
+            string folder = Path.Combine(_main.Config.DownloadPath, query);
+            Directory.CreateDirectory(folder);
+
+            // نضيف رابط البحث كبلاي ليست
+            string playlistUrl = $"https://www.youtube.com/results?search_query={Uri.EscapeDataString(query)}&sp=EgIQAw%3D%3D";
+            _main.AddDownload(playlistUrl);
+
+            MessageBox.Show($"سيتم تحميل البلاي ليست في: {folder}");
+        }
+    }
+
+    public class StudyItem
+    {
+        public string Title { get; set; }
+        public string Url { get; set; }
+        public override string ToString() => Title;
+    }
+}

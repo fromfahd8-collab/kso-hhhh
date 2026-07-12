@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+    <AssemblyTitle>KSO Download Turbo Ultra V1.0 PRO</AssemblyTitle>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>false</SelfContained>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="SpeedTest.Net" Version="4.1.0" />
+    <PackageReference Include="Xceed.Wpf.Toolkit" Version="4.6.0" />
+    <PackageReference Include="Microsoft.Web.WebView2.Wpf" Version="1.0.2210.55" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- غيرناهم لـ EmbeddedResource عشان يدخلوا جوا الـ exe -->
+    <EmbeddedResource Include="Resources\config.json" />
+    <EmbeddedResource Include="Resources\lang.json" />
+    <EmbeddedResource Include="Resources\ffmpeg.exe" />
+    <Resource Include="app.ico" />
+  </ItemGroup>
+
+</Project>
