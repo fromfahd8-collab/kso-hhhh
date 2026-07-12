@@ -1,4 +1,4 @@
-name: Build KSO Ultra + Setup
+name: Build KSO Ultra
 
 on:
   push:
@@ -29,11 +29,12 @@ jobs:
         powershell xcopy Modules setup_files\Modules\ /E /Y
         powershell xcopy Resources setup_files\Resources\ /E /Y
     
-    - run: powershell & ${env:ProgramFiles(x86)}\Inno` Setup` 6\ISCC.exe setup.iss
+    - run: powershell & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" setup.iss
     
     - uses: softprops/action-gh-release@v2
       with:
         files: |
           KSO-Ultra-Portable.zip
           Output/*.exe
-      env: { GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} }
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
