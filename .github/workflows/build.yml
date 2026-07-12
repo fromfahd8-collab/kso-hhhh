@@ -46,7 +46,7 @@ jobs:
 
     - name: Build Setup.exe
       shell: powershell
-      run: & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" setup.iss
+      run: '& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" setup.iss'
 
     - name: Create Release
       uses: softprops/action-gh-release@v2
