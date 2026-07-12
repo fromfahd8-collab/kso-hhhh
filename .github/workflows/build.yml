@@ -1,0 +1,52 @@
+name: Build KSO Ultra + Setup
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup.NET 8
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore
+      run: dotnet restore KSO.csproj
+
+    - name: Publish Portable
+      run: dotnet publish KSO.csproj -c Release -r win-x64 --self-contained false -o publish
+
+    - name: Zip Portable
+      run: Compress-Archive -Path publish\* -DestinationPath KSO-Ultra-Portable.zip
+
+    - name: Install Inno Setup
+      run: |
+        curl -L https://jrsoftware.org/download.php/inno-setup.exe -o inno.exe
+       .\inno.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART
+
+    - name: Prepare Setup Files
+      run: |
+        mkdir setup_files
+        copy publish\* setup_files\ /Y
+        copy app.ico setup_files\ /Y
+        copy config.json setup_files\ /Y
+        copy Resources setup_files\Resources\ /E /Y
+
+    - name: Build Setup.exe
+      run: & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" setup.iss
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          KSO-Ultra-Portable.zip
+          Output/*.exe
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
