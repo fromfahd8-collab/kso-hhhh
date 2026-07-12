@@ -24,7 +24,7 @@ jobs:
       run: dotnet publish KSO.csproj -c Release -r win-x64 --self-contained false -o publish
 
     - name: Zip Portable
-      run: Compress-Archive -Path publish\* -DestinationPath KSO-Ultra-Portable.zip
+      run: Compress-Archive -Path "publish\*" -DestinationPath "KSO-Ultra-Portable.zip"
 
     - name: Install Inno Setup
       run: |
@@ -34,10 +34,12 @@ jobs:
     - name: Prepare Setup Files
       run: |
         mkdir setup_files
-        copy publish\* setup_files\ /Y
-        copy app.ico setup_files\ /Y
-        copy config.json setup_files\ /Y
-        copy Resources setup_files\Resources\ /E /Y
+        xcopy publish\* setup_files\ /E /Y
+        xcopy app.ico setup_files\ /Y
+        xcopy lang.json setup_files\ /Y
+        xcopy config.json setup_files\ /Y
+        xcopy Modules setup_files\Modules\ /E /Y
+        xcopy Resources setup_files\Resources\ /E /Y
 
     - name: Build Setup.exe
       run: & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" setup.iss
