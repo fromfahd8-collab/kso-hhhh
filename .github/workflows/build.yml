@@ -2,8 +2,7 @@ name: Build KSO Ultra + Setup
 
 on:
   push:
-    tags:
-      - 'v*'
+    tags: [ 'v*' ]
 
 jobs:
   build:
@@ -12,35 +11,29 @@ jobs:
     - uses: actions/checkout@v4
     - uses: actions/setup-dotnet@v4
       with: { dotnet-version: '8.0.x' }
+    
     - run: dotnet restore KSO.csproj
     - run: dotnet publish KSO.csproj -c Release -r win-x64 --self-contained false -o publish
     
-    - name: Zip Portable
-      run: powershell Compress-Archive -Path "publish\*" -DestinationPath "KSO-Ultra-Portable.zip"
+    - run: powershell Compress-Archive -Path publish\* -DestinationPath KSO-Ultra-Portable.zip
     
-    - name: Install Inno
-      run: |
+    - run: |
         powershell curl -L https://jrsoftware.org/download.php/inno-setup.exe -o inno.exe
-        powershell .\inno.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART
+        powershell .\inno.exe /VERYSILENT
     
-    - name: Prepare Files
-      run: |
+    - run: |
         powershell mkdir setup_files
         powershell xcopy publish\* setup_files\ /E /Y
         powershell xcopy app.ico setup_files\ /Y
-        powershell xcopy lang.json setup_files\ /Y
-        powershell xcopy config.json setup_files\ /Y
+        powershell xcopy *.json setup_files\ /Y
         powershell xcopy Modules setup_files\Modules\ /E /Y
         powershell xcopy Resources setup_files\Resources\ /E /Y
     
-    - name: Build Setup.exe
-      run: powershell "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" setup.iss
+    - run: powershell & ${env:ProgramFiles(x86)}\Inno` Setup` 6\ISCC.exe setup.iss
     
-    - name: Create Release
-      uses: softprops/action-gh-release@v2
+    - uses: softprops/action-gh-release@v2
       with:
         files: |
           KSO-Ultra-Portable.zip
           Output/*.exe
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      env: { GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} }
