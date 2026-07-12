@@ -17,19 +17,23 @@ jobs:
     
     - run: powershell Compress-Archive -Path publish\* -DestinationPath KSO-Ultra-Portable.zip
     
-    - run: |
-        powershell curl -L https://jrsoftware.org/download.php/inno-setup.exe -o inno.exe
-        powershell .\inno.exe /VERYSILENT
+    - name: Install Inno
+      run: |
+        curl -L https://jrsoftware.org/download.php/inno-setup.exe -o inno.exe
+        inno.exe /VERYSILENT
     
-    - run: |
-        powershell mkdir setup_files
-        powershell xcopy publish\* setup_files\ /E /Y
-        powershell xcopy app.ico setup_files\ /Y
-        powershell xcopy *.json setup_files\ /Y
-        powershell xcopy Modules setup_files\Modules\ /E /Y
-        powershell xcopy Resources setup_files\Resources\ /E /Y
+    - name: Prepare Files
+      run: |
+        mkdir setup_files
+        xcopy publish\* setup_files\ /E /Y
+        xcopy app.ico setup_files\ /Y
+        xcopy *.json setup_files\ /Y
+        xcopy Modules setup_files\Modules\ /E /Y
+        xcopy Resources setup_files\Resources\ /E /Y
     
-    - run: powershell & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" setup.iss
+    - name: Build Setup
+      shell: cmd
+      run: "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" setup.iss
     
     - uses: softprops/action-gh-release@v2
       with:
