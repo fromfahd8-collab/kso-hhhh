@@ -29,7 +29,7 @@ jobs:
         xcopy Modules setup_files\Modules\ /E /Y
         xcopy Resources setup_files\Resources\ /E /Y
     
-    - run: "C:\\Program Files (x86)\\Inno Setup 6\\ISCC.exe" setup.iss
+    - run: '"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" setup.iss'
       shell: cmd
     
     - uses: softprops/action-gh-release@v2
